@@ -1,6 +1,6 @@
 const mongoose=require("mongoose");
 const Schema = mongoose.Schema;
-
+const Review=require("./review.js");
 const listingSchema = new Schema({
     title: {
         type: String,
@@ -8,16 +8,44 @@ const listingSchema = new Schema({
     },
     description:String,
     image:{
+        url:String,
         filename:String,
-        url:{
-            type:String,
-        default:"https://unsplash.com/photos/cozy-living-room-with-fireplace-and-two-armchairs-lNai4YWMFMc",
-        set: (v) => v==="" ? "https://unsplash.com/photos/cozy-living-room-with-fireplace-and-two-armchairs-lNai4YWMFMc" : v,
-        },
     },
     price:Number,
     location:String,
     country:String,
+
+    geometry:{
+    type:{
+        type:String,
+        enum:["Point"],
+        required:true,
+    },
+    coordinates:{
+        type:[Number],
+        required:true,
+    },
+},
+
+
+    reviews: [
+        {
+            type: Schema.Types.ObjectId,
+            ref:"Review",
+        }
+    ],
+    owner:{
+        type:Schema.Types.ObjectId,
+        ref:"User",
+    },
+});
+
+listingSchema.post("findOneAndDelete",async(listing)=>{
+    if(listing){
+        await Review.deleteMany({_id:{$in:listing.reviews}});
+    };
+    
+
 });
 
 const Listing=mongoose.model("Listing",listingSchema);

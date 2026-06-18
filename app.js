@@ -1,3 +1,8 @@
+if(process.env.NODE_ENV!="production"){
+    require('dotenv').config();
+}
+
+
 const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
@@ -5,11 +10,45 @@ const Listing = require("./models/listing.js");
 const path=require("path");
 const methodOverride=require("method-override");
 const ejsMate=require("ejs-mate");
-const wrapAsync = require("./utils/wrapAsync.js");
+//const wrapAsync = require("./utils/wrapAsync.js");
 const ExpressError = require("./utils/ExpressError.js");
-const {listingSchema}=require("./schema.js");
+const MongoStore=require("connect-mongo").default;
+const session=require("express-session");
+const {listingSchema,reviewSchema}=require("./schema.js");
+const Review = require("./models/review.js");
+const flash=require("connect-flash");
+//routes
+const listingRouter=require("./routes/listing.js");
+const reviewRouter=require("./routes/review.js");
+const userRouter=require("./routes/user.js");
 
-const MONGO_URL="mongodb://127.0.0.1:27017/wanderlust";
+
+const passport=require("passport");
+const LocalStrategy=require("passport-local");
+const User=require("./models/user.js"); 
+//const MONGO_URL="mongodb://127.0.0.1:27017/wanderlust";
+console.log("ATLAS_DB =", process.env.ATLAS_DB);
+const atsurl=process.env.ATLAS_DB;
+const store=MongoStore.create({
+    mongoUrl:atsurl,
+    crypto:{
+        secret:process.env.SECRET,
+    },
+    touchAfter:24*3600, 
+});
+store.on("error",(err)=>{
+    console.log("error in mongo session store", err);
+});
+const sessionOptions={store,
+    secret:process.env.SECRET,
+    resave:false,
+    saveUninitialized:true,
+    cookie:{
+        expires:Date.now()+7*24*60*60*1000,
+        maxAge:7*24*60*60*1000,
+        httpOnly:true,
+    },
+};
 
 main()
     .then(()=>{
@@ -20,98 +59,55 @@ main()
     console.log(err);
 });
 async function main() {
-    await mongoose.connect(MONGO_URL);
+    await mongoose.connect(atsurl);
 }
+
 
 app.get("/",(req,res)=>{
     res.send("hi i am root");
 });
 
+app.use(express.urlencoded({extended:true}));
+app.use(methodOverride("_method"));
+app.use(session(sessionOptions));
+app.use(flash());
 
-//Index Route
+//users
+app.use(passport.initialize());
+app.use(passport.session());
+passport.use(new LocalStrategy(User.authenticate()));
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
+
+app.use((req,res,next)=>{
+    res.locals.success=req.flash("success");
+    res.locals.error=req.flash("error");
+    res.locals.currUser=req.user;
+    next();
+});
+
+// app.get("/demouser",async(req,res)=>{
+//     let fakeUser=new User({
+//         email:"student3@gmail.com",
+//         username:"delta-student3"
+//     });
+//    let registerduser=await User.register(fakeUser,"heloworld");
+//     res.send(registerdUser);
+// });
+//index
 app.engine('ejs', ejsMate);
 app.set("view engine","ejs");
 app.set("views",path.join(__dirname,"views"));
-app.use(express.urlencoded({extended:true}));
-app.use(methodOverride("_method"));
-app.get("/listings",wrapAsync (async(req,res)=>{
-    const allListings = await Listing.find({});
-    res.render("listings/index.ejs",{allListings})
-}));
+//this for routes/
+app.use("/listings",listingRouter);
+app.use("/listings/:id/reviews",reviewRouter);
+app.use("/",userRouter);
 
-const validateListing=(req,res,next)=>{
-    let {error}=listingSchema.validate(req.body);
-    if(error){
-        let errMSg=error.details.map((el)=>el.message).join(",");
-        throw new ExpressError(400,errMSg);
-    }else{
-        next();
-    }
-};
-
+///style
 app.use(express.static(path.join(__dirname,"/public")));
 
-//new route
-app.get("/listings/new",(req,res)=>{
-    res.render("listings/new.ejs");
-    
-});
 
-//show Route
-app.get("/listings/:id",wrapAsync(async (req,res)=>{
-    let {id}=req.params;
-    const listing=await Listing.findById(id)
-    res.render("listings/show.ejs",{listing});
-}));
 
-//create new rout to connect the new form
-app.post("/listings",validateListing, wrapAsync (async (req, res,next) => {
-    let result=listingSchema.validate(req.body);
-    console.log(result);
-    if(result.error){
-        throw new ExpressError(400,result.err);
-    }
-    const newListing = new Listing(req.body.listing);
-    await newListing.save();
-    res.redirect("/listings")
-
-}));
-
-//edit route
-app.get("/listings/:id/edit",wrapAsync (async(req,res)=>{
-    let {id}=req.params;
-    const listing=await Listing.findById(id);
-    res.render("listings/edit.ejs",{listing});
-}));
-
-//upadte route
-app.put("/listings/:id",validateListing, wrapAsync (async(req,res)=>{
-    let {id}=req.params;
-    await Listing.findByIdAndUpdate(id,{...req.body.listing});
-    res.redirect(`/listings/${id}`);
-}));
-
-//delete
-app.delete("/listings/:id",wrapAsync (async(req,res)=>{
-    let{id}=req.params;
-    let deletedListing =await Listing.findByIdAndDelete(id);
-    console.log(deletedListing);
-    res.redirect("/listings");
-}));
-
-// app.get("/testListing",async(req,res)=>{
-//     let sampleListing=new listing({
-//         title:"My Home",
-//         description:"By the beach",
-//         price:12000,
-//         location:"goa",
-//         country:"india",
-//     });
-//     await sampleListing.save();
-//     console.log("sample was saved ");
-//     res.send("sucessful testing");
-
-// });
 
 app.use((req,res,next)=>{
     next(new ExpressError(404,"page not found"));
@@ -122,6 +118,6 @@ app.use((err, req,res , next)=>{
     res.status(statusCode).render("error.ejs",{message});
     //res.status(statusCode).send(message);
 });
-app.listen(8080, () =>{
-    console.log("server is running in 8080");
+app.listen(9090, () =>{
+    console.log("server is running in 9090");
 });
