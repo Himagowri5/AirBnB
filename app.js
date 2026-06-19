@@ -28,6 +28,7 @@ const LocalStrategy=require("passport-local");
 const User=require("./models/user.js"); 
 //const MONGO_URL="mongodb://127.0.0.1:27017/wanderlust";
 console.log("ATLAS_DB =", process.env.ATLAS_DB);
+console.log("DB URL FOUND:", !!process.env.ATLAS_DB);
 const atsurl=process.env.ATLAS_DB;
 const store=MongoStore.create({
     mongoUrl:atsurl,
