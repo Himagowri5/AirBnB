@@ -92,7 +92,8 @@ module.exports.search=async (req, res) => {
         $or: [
             { title: { $regex: q, $options: "i" } },
             { location: { $regex: q, $options: "i" } },
-            { country: { $regex: q, $options: "i" } }
+            { country: { $regex: q, $options: "i" } },
+            { categories: { $regex: q, $options: "i" } }
         ]
     });
 

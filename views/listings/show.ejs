@@ -104,7 +104,7 @@ L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
 
 L.marker([coordinates[1], coordinates[0]])
     .addTo(map)
-    .bindPopup("<b><%= listing.title %></b>")
+    .bindPopup("<b><%= listing.title %></b><%= listing.location %>, <%= listing.country %>")
     .openPopup();
 </script>
 </div>
