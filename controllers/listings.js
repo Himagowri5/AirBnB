@@ -31,8 +31,9 @@ module.exports.showListings=async (req,res)=>{
 module.exports.createListing=async (req, res,next) => {
     let url=req.file.path;
     let filename=req.file.filename;
-   
+   console.log(req.body.listing);
     const newListing = new Listing(req.body.listing);
+    
         newListing.geometry = await getCoordinates(newListing.location);
     newListing.owner = req.user._id;
     newListing.image={url,filename};
@@ -71,4 +72,29 @@ module.exports.deleteListing=async(req,res)=>{
     console.log(deletedListing);
     req.flash("success","listing deleted!");
     res.redirect("/listings");
+};
+
+module.exports.filter=async (req, res) => {
+    let { category } = req.params;
+
+    let allListings = await Listing.find({
+        categories: category
+    });
+
+    res.render("listings/index.ejs", { allListings });
+};
+
+
+module.exports.search=async (req, res) => {
+    let { q } = req.query;
+
+    let allListings = await Listing.find({
+        $or: [
+            { title: { $regex: q, $options: "i" } },
+            { location: { $regex: q, $options: "i" } },
+            { country: { $regex: q, $options: "i" } }
+        ]
+    });
+
+    res.render("listings/index.ejs", { allListings });
 };

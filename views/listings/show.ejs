@@ -3,7 +3,6 @@
     <div class="col-8 offset-2">
     <h3><b><%= listing.title %></b></h3>
     <div class="card col-8 offset-2 show-card listing-card">
-        <!-- <div class="card" style="width: 18rem;"> -->
         <img src="<%= listing.image.url %>" class="card-img-top show-img" alt="listing_image">
         <div class="card-body">
               <% if(listing.owner){ %>
@@ -15,7 +14,6 @@
                 <p class="card-text"><%= listing.country %><br><br></p>
             
         </div>
-<!-- </div> -->
         </div>
     <br>
     <% if(currUser && listing.owner && currUser._id.equals(listing.owner._id)){ %>
@@ -29,7 +27,7 @@
     </div>
     <% } %>
 
-    <!-- review session -->
+
     <% if(currUser){ %>
     <div class="col-8 offset-3">
         <hr/>
@@ -38,7 +36,7 @@
             <div class="mb-3 mt-3">
                <h7><legend>Rating</legend></h7> 
             <fieldset class="starability-slot">
-                <!-- <label for="rating" class="form-label">Rating</label> -->
+
   
   <input type="radio" id="no-rate" class="input-no-rate" name="review[rating]" value="1" checked aria-label="No rating." />
   <input type="radio" id="first-rate1" name="review[rating]" value="1" />
@@ -74,10 +72,11 @@
                 <p class="starability-result card-text" data-rating="<%= review.rating %>"></p>
                 <p class="card-text"><%= review.comment %></p>
             </div>
-            <form class="mb-3" method="POST" action="/listings/<%= listing._id %>/reviews/<%= review._id %>?_method=DELETE">
-                <button class="btn btn-sm btn-dark">
-                    Delete
-                </button>
+            <% if(currUser && review.author && currUser._id.equals(review.author._id)){ %>
+                <form class="mb-3" method="POST" action="/listings/<%= listing._id %>/reviews/<%= review._id %>?_method=DELETE">
+                    <button class="btn btn-sm btn-dark">Delete</button>
+                </form>
+            <% } %>
             </form>
         </div>
     <%}%>

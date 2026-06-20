@@ -20,7 +20,8 @@ router.route("/")
 
 //new route
 router.get("/new",isLoggedIn,listingController.renderNewForm);
-
+//search bar
+router.get("/search", listingController.search);
 router.route("/:id")
 .get(wrapAsync(listingController.showListings))
 
@@ -29,4 +30,8 @@ router.route("/:id")
 
 //edit
 router.get("/:id/edit",isLoggedIn,wrapAsync (listingController.editListing));
+
+//filters
+router.get("/filter/:category", listingController.filter);
 module.exports=router;
+

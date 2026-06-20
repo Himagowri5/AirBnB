@@ -40,6 +40,24 @@
             <input name="listing[location]" placeholder="enter location" type ="text" class="form-control" required>
             <div class="invalid-feedback">location should be valid</div>
         </div>
+        <div  id="categories-container">
+            <label>Categories</label>
+
+            <select name="listing[categories][]" class="form-select">
+                <option>Mountain</option>
+                <option>Beach</option>
+                <option>Snow</option>
+                <option>Desert</option>
+                <option>Rooms</option>
+                <option>Tents</option>
+                <option>Pool</option>
+                <option>Spa</option>
+                <option>River</option>
+                <option>Adventure</option>
+            </select>
+
+            <button type="button" id="addCategory">+</button>
+        </div>
         <br>
         
         <button class="btn btn-dark add-btn">Add</button>
@@ -48,3 +66,27 @@
     </div>
 </div>
 
+<script>
+document.getElementById("addCategory").addEventListener("click", () => {
+    let container = document.getElementById("categories-container");
+
+    let select = document.createElement("select");
+    select.name = "listing[categories][]";
+    select.className = "form-select mt-2";
+
+    select.innerHTML = `
+        <option>Mountain</option>
+        <option>Beach</option>
+        <option>Snow</option>
+        <option>Desert</option>
+        <option>Rooms</option>
+        <option>Tents</option>
+        <option>Pool</option>
+        <option>Spa</option>
+        <option>River</option>
+        <option>Adventure</option>
+    `;
+
+    container.appendChild(select);
+});
+</script>

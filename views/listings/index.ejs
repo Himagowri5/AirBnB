@@ -10,10 +10,12 @@
         text-align: center;
         margin-right: 2rem;
         margin-top: 2rem;
-        opacity: 0.7;
+        opacity: 0.5;
+        text-decoration:none;
+        color:black;
     }
     .filter:hover{
-        opacity: 1;
+        opacity: 1.5;
         cursor: pointer;
     }
     .filter p{
@@ -24,22 +26,61 @@
         display: none;
     }
     .tax-switch{
+        position: fixed;
+        top: 120px;
+        right: 20px;
         border: 1px solid black;
         border-radius: 1rem;
-        height: 3.5rem;
         padding: 1rem;
-        margin-left: 5rem;
+        background-color: white;
+        z-index: 1000;
     }
 </style>
 <div id="filters">
-    <div id="filter">
-        <i class="fa-solid fa-fire"></i>
-        <p>Trending</p>
-    </div>
-    <div id="filter">
+    <a href="/listings" class="filter">
+        <i class="fa-solid fa-house"></i>
+        <p>All</p>
+    </a>
+    <a href="/listings/filter/Mountain" class="filter">
+        <i class="fa-solid fa-mountain"></i>
+        <p>Mountain</p>
+    </a>
+    <a href="/listings/filter/Rooms" class="filter">
         <i class="fa-solid fa-bed"></i>
         <p>Rooms</p>
-    </div>
+    </a>
+    <a href="/listings/filter/Beach" class="filter">
+        <i class="fa-solid fa-umbrella-beach"></i>
+        <p>Beach</p>
+    </a>
+    <a href="/listings/filter/Snow" class="filter">
+        <i class="fa-solid fa-snowman"></i>
+        <p>Snow</p>
+    </a>
+    <a href="/listings/filter/Desert" class="filter">
+        <i class="fa-regular fa-sun"></i>
+        <p>Desert</p>
+    </a>
+    <a href="/listings/filter/Tents" class="filter">
+        <i class="fa-solid fa-tents"></i>
+        <p>Tents</p>
+    </a>
+    <a href="/listings/filter/Pool" class="filter">
+        <i class="fa-solid fa-water-ladder"></i>
+        <p>Pool</p>
+    </a>
+    <a href="/listings/filter/Spa" class="filter">
+        <i class="fa-solid fa-spa"></i>
+        <p>Spa</p>
+    </a>
+    <a href="/listings/filter/River" class="filter">
+        <i class="fa-solid fa-water"></i>
+        <p>River</p>
+    </a>
+    <a href="/listings/filter/Adventure" class="filter">
+        <i class="fa-solid fa-person-hiking"></i>
+        <p>Adventure</p>
+    </a>
     <div class="tax-switch">
         <div class="form-check-reverse form-switch">
             <input class="form-check-input" type="checkbox" role="switch" id="switchCheckDefault">
@@ -49,7 +90,7 @@
 </div>
     <div class="row row-cols-lg-3 row-cols-md-3 row-cols-sm-1 mt-3">
     <% for(let listing of allListings){%>
-        <a href="listings/<%= listing._id %>" class ="listing-link">
+        <a href="/listings/<%= listing._id %>" class ="listing-link">
             <div class="card col listing-card" >
                 <img src="<%= listing.image.url %>" class="card-img-top" alt="listing_image" style="height: 20rem";>
                 <div class="card-img-overlay"></div>
